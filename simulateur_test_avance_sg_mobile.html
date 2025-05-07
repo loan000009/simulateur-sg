@@ -1,0 +1,194 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Simulateur Société Générale - Mobile</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 100%; font-size: 16px; margin: auto; }
+        h1, h2 { color: #2c3e50; }
+        .question { margin-bottom: 20px; }
+        .answers label { display: block; margin-bottom: 5px; }
+        .btn { width: 100%; padding: 12px; background-color: #3498db; color: white; border: none; cursor: pointer; }
+        .btn:hover { background-color: #2980b9; }
+        #result { margin-top: 30px; font-weight: bold; }
+        .hidden { display: none; }
+        #timer { font-size: 1.2em; color: #c0392b; margin-bottom: 20px; }
+        .explanation { margin-top: 10px; font-style: italic; color: #2d3436; }
+    </style>
+</head>
+<body>
+    <h1>Simulateur Société Générale - Test de Présélection</h1>
+    <div id="timer">Temps restant : <span id="time">60:00</span></div>
+    <form id="quizForm">
+        <div id="quiz"></div>
+        <button type="button" class="btn" onclick="submitQuiz()">Valider le test</button>
+    </form>
+    <div id="result" class="hidden"></div>
+    <script>
+        const timerElement = document.getElementById("time");
+        let timeLeft = 60 * 60;
+
+        const explanations = [
+            "On ne peut pas conclure car tous les analystes ne sont pas nécessairement créatifs.",
+            "C'est une progression géométrique de facteur 3.",
+            "Si aucun responsable n'est distrait et tous les directeurs sont responsables, alors aucun directeur n’est distrait.",
+            "La séquence suit A, B, C, A, B, donc la suite logique est C.",
+            "Couper un coin crée deux coins supplémentaires, donc 6 au total.",
+            "x² + y² = (x + y)² - 2xy = 144 - 70 = 74.",
+            "100 -> +20% = 120 -> -20% = 96 donc perte globale de 4%.",
+            "80 -> 64 représente une baisse de 20%.",
+            "Les racines de (3x - 2)(x + 4) = 0 sont x = 2/3 et x = -4.",
+            "Total = 140 + 25 = 165 ; Moyenne = 165 / 5 = 33.",
+            "‘Succinct’ signifie ‘concis’.",
+            "Le mot mal orthographié est 'Parralèle' (il faut écrire 'Parallèle').",
+            "Le subjonctif imparfait s’impose : ‘bien qu’il échouât’.",
+            "L’antonyme de 'ambigu' est 'clair'.",
+            "Le mot logique ici est 'prudence'."
+        ];
+
+        const quizData = [
+            {
+                question: "LOGIQUE : Si tous les analystes sont rigoureux, et que certains rigoureux sont créatifs, peut-on déduire que certains analystes sont créatifs ?",
+                options: ["Oui", "Non", "Seulement si tous les rigoureux sont analystes", "On ne peut pas savoir"],
+                answer: 3
+            },
+            {
+                question: "LOGIQUE : Quelle est la suite logique ? 3, 9, 27, 81, ?",
+                options: ["162", "243", "324", "218"],
+                answer: 1
+            },
+            {
+                question: "LOGIQUE : Tous les directeurs sont responsables. Aucun responsable n'est distrait. Quelle affirmation est vraie ?",
+                options: ["Tous les directeurs sont distraits", "Certains responsables sont directeurs", "Aucun directeur n’est distrait", "Les directeurs ne sont pas responsables"],
+                answer: 2
+            },
+            {
+                question: "LOGIQUE : Quelle figure vient ensuite ? (A, B, C, A, B, ...)",
+                options: ["A", "C", "B", "D"],
+                answer: 1
+            },
+            {
+                question: "LOGIQUE : Un carré a 4 coins. Si on coupe un coin, combien de coins a-t-on ?",
+                options: ["3", "5", "6", "8"],
+                answer: 2
+            },
+            {
+                question: "NUMÉRIQUE : Si x + y = 12 et xy = 35, quel est x² + y² ?",
+                options: ["144", "74", "64", "50"],
+                answer: 1
+            },
+            {
+                question: "NUMÉRIQUE : Une action augmente de 20%, puis baisse de 20%. Quel est le changement global ?",
+                options: ["0%", "+4%", "-4%", "+20%"],
+                answer: 2
+            },
+            {
+                question: "NUMÉRIQUE : Si un produit passe de 80€ à 64€, quelle est la baisse en pourcentage ?",
+                options: ["20%", "25%", "16%", "18%"],
+                answer: 1
+            },
+            {
+                question: "NUMÉRIQUE : Résolvez : (3x - 2)(x + 4) = 0. Quelle est une solution ?",
+                options: ["x = -4", "x = 2", "x = 3", "x = -2"],
+                answer: 0
+            },
+            {
+                question: "NUMÉRIQUE : Moyenne de 4 nombres est 35. Un nouveau nombre est ajouté : 25. Nouvelle moyenne ?",
+                options: ["34", "32", "30", "33"],
+                answer: 3
+            },
+            {
+                question: "VERBAL : Trouvez le synonyme de ‘succinct’.",
+                options: ["Long", "Concis", "Compliqué", "Riche"],
+                answer: 1
+            },
+            {
+                question: "VERBAL : Quel mot est mal orthographié ?",
+                options: ["Nécessaire", "Parralèle", "Réussite", "Important"],
+                answer: 1
+            },
+            {
+                question: "VERBAL : Complétez : « Bien qu’il ___, il réussit brillamment. »",
+                options: ["échoue", "échoua", "échouât", "échouer"],
+                answer: 2
+            },
+            {
+                question: "VERBAL : L’antonyme de 'ambigu' est :",
+                options: ["Confus", "Claire", "Sombre", "Douteux"],
+                answer: 1
+            },
+            {
+                question: "VERBAL : Quel mot complète la phrase ? « Il agit avec beaucoup de ___ dans ses décisions. »",
+                options: ["précipitation", "prudence", "colère", "vanité"],
+                answer: 1
+            }
+        ];
+
+        function renderQuiz() {
+            const quizDiv = document.getElementById("quiz");
+            quizData.forEach((q, i) => {
+                const qDiv = document.createElement("div");
+                qDiv.className = "question";
+                qDiv.innerHTML = `<h3>Question ${i + 1}</h3><p>${q.question}</p>`;
+                const optionsDiv = document.createElement("div");
+                optionsDiv.className = "answers";
+                q.options.forEach((opt, j) => {
+                    const optId = `q${i}_${j}`;
+                    optionsDiv.innerHTML += `
+                        <label>
+                            <input type="radio" name="q${i}" value="${j}" id="${optId}"> ${opt}
+                        </label>
+                    `;
+                });
+                qDiv.appendChild(optionsDiv);
+                quizDiv.appendChild(qDiv);
+            });
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            let score = 0;
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = "<h2>Résultats</h2>";
+            quizData.forEach((q, i) => {
+                const selected = document.querySelector(`input[name="q${i}"]:checked`);
+                const isCorrect = selected && parseInt(selected.value) === q.answer;
+                if (isCorrect) score++;
+                resultDiv.innerHTML += `<p><strong>Q${i + 1}.</strong> ${q.question}<br>
+                    <em>Votre réponse : ${selected ? q.options[selected.value] : "Non répondu"}</em><br>
+                    <strong>Bonne réponse : ${q.options[q.answer]}</strong><br>
+                    <span class="explanation">${explanations[i]}</span></p>`;
+            });
+            resultDiv.innerHTML += `<h3>Score : ${score} / ${quizData.length}</h3>`;
+            resultDiv.classList.remove("hidden");
+
+            let previous = localStorage.getItem("scores");
+            let scores = previous ? JSON.parse(previous) : [];
+            scores.push({ date: new Date().toLocaleString(), score: score });
+            localStorage.setItem("scores", JSON.stringify(scores));
+
+            setTimeout(() => location.reload(), 15000);
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerElement.textContent = `Temps restant : ${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitQuiz();
+                }
+            }, 1000);
+        }
+
+        window.onload = function () {
+            renderQuiz();
+            startTimer();
+        };
+    </script>
+</body>
+</html>
